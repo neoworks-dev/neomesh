@@ -1,0 +1,11 @@
+{
+  "name": "neomesh",
+  "version": "0.1.0",
+  "description": "ESP32 mesh networking library",
+  "frameworks": ["arduino"],
+  "platforms": ["espressif32"],
+  "build": {
+    "srcDirs": ["src"],
+    "includeDir": "include"
+  }
+}

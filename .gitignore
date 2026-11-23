@@ -1,0 +1,6 @@
+.pio
+src/main.cpp
+.cache/
+compile_commands.json
+meshtest-*.log
+tools/meshtest/meshtest

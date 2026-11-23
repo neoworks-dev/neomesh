@@ -1,0 +1,84 @@
+# https://taskfile.dev
+version: "3"
+
+vars:
+  ENV: esp32c3_supermini
+  BAUD: 115200
+  FILTER: esp32_exception_decoder
+
+tasks:
+  # --- Discovery ---
+  devices:
+    desc: List connected devices and their ports
+    cmd: pio device list
+
+  # --- Build ---
+  build:
+    desc: Compile firmware
+    cmd: pio run -e {{.ENV}}
+
+  clean:
+    desc: Clean build artifacts
+    cmd: pio run -e {{.ENV}} -t clean
+
+  fullclean:
+    desc: Full clean (removes .pio entirely)
+    cmd: pio run -e {{.ENV}} -t fullclean
+
+  # --- Single device ---
+  upload:
+    desc: Upload to the only connected device
+    cmd: pio run -e {{.ENV}} -t upload
+
+  monitor:
+    desc: Monitor the only connected device
+    cmd: pio device monitor --baud {{.BAUD}} --filter {{.FILTER}}
+
+  flash:
+    desc: Upload then monitor (single device)
+    cmds:
+      - task: upload
+      - task: monitor
+
+  # --- Two devices (pass PORT_A and PORT_B) ---
+  # Usage: task upload-a PORT_A=/dev/ttyACM0
+  upload-a:
+    desc: "Upload to node A  (PORT_A=/dev/ttyACM0)"
+    cmd: pio run -e {{.ENV}} -t upload --upload-port {{.PORT_A}}
+
+  upload-b:
+    desc: "Upload to node B  (PORT_B=/dev/ttyACM1)"
+    cmd: pio run -e {{.ENV}} -t upload --upload-port {{.PORT_B}}
+
+  upload-both:
+    desc: "Upload to both nodes sequentially  (PORT_A=... PORT_B=...)"
+    cmds:
+      - task: upload-a
+      - task: upload-b
+
+  monitor-a:
+    desc: "Monitor node A  (PORT_A=/dev/ttyACM0)"
+    cmd: pio device monitor --port {{.PORT_A}} --baud {{.BAUD}} --filter {{.FILTER}}
+
+  monitor-b:
+    desc: "Monitor node B  (PORT_B=/dev/ttyACM1)"
+    cmd: pio device monitor --port {{.PORT_B}} --baud {{.BAUD}} --filter {{.FILTER}}
+
+  monitor-both:
+    desc: "Monitor both nodes in a kitty split  (PORT_A=... PORT_B=...)"
+    cmds:
+      - kitty @ launch --location=vsplit --cwd=current
+        pio device monitor --port {{.PORT_B}} --baud {{.BAUD}} --filter {{.FILTER}} &
+      - pio device monitor --port {{.PORT_A}} --baud {{.BAUD}} --filter {{.FILTER}}
+
+  flash-both:
+    desc: "Upload to both then open split monitors  (PORT_A=... PORT_B=...)"
+    cmds:
+      - task: upload-both
+      - task: monitor-both
+
+  # --- Test TUI ---
+  tui:
+    desc: "Launch the two-device test TUI (build/flash/monitor both boards)"
+    dir: tools/meshtest
+    cmd: go run . -C "{{.TASKFILE_DIR}}"

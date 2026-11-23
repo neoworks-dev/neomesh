@@ -1,0 +1,10 @@
+CompileFlags:
+  Remove:
+    - -fstrict-volatile-bitfields
+    - -fno-tree-switch-conversion
+    - -mtext-section-literals
+    - -mlongcalls
+    - -ffunction-sections
+    - -fdata-sections
+    - -fno-exceptions
+    - -fno-rtti
