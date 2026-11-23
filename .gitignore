@@ -4,3 +4,4 @@ src/main.cpp
 compile_commands.json
 meshtest-*.log
 tools/meshtest/meshtest
+examples/*/secrets.h
